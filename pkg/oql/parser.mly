@@ -83,7 +83,7 @@ let result_column :=
   | STAR; { Star }
   | expression = expression; { Expression (expression, None) }
 
-let from := 
+let from :=
   | FROM; relation = separated_nonempty_list(COMMA, table_or_subquery); { From relation }
   | FROM; relation = table_or_subquery; stanzas = join_stanza+; { Join { relation; stanzas } }
   (* | FROM;  *)
@@ -94,7 +94,7 @@ let where :=
 let join_stanza :=
   | ~ = join_operator; ~ = table_or_subquery; ~ = join_constraint; { join_operator, table_or_subquery, join_constraint }
 
-let join_operator := 
+let join_operator :=
   | LEFT; OUTER; JOIN; { LeftOuter }
   | INNER; JOIN; { Inner }
   (* ... *)
@@ -126,7 +126,7 @@ let expression :=
   | function_call
 
 let column_name :=
-  | ~ = name; { 
+  | ~ = name; {
     let field = Field.make name in
     Column.make None None field
   }
@@ -137,7 +137,7 @@ let field :=
     ModelField (ModelField.make m name)
   }
 
-let model := 
+let model :=
   | m = MODULE; { $startpos, $endpos, m }
 
 let column :=
@@ -145,7 +145,7 @@ let column :=
   | ~ = schema; { schema }
   | ~ = table; { table }
 
-let schema := 
+let schema :=
   | schema = name; DOT; table = name; DOT; field = name; {
     let schema = Schema.make schema in
     let table = Table.make table in
@@ -153,7 +153,7 @@ let schema :=
     Column (Column.make (Some schema) (Some table) field)
   }
 
-let table := 
+let table :=
   | table = name; DOT; field = name; {
     let table = Table.make table in
     let field = Field.make field in
@@ -182,21 +182,21 @@ let unop :=
 let function_call :=
   | ~ = func_name; args = delimited(LPAR, separated_list(COMMA, expression), RPAR); <FunctionCall>
 
-let func_name := 
+let func_name :=
   | ~ = name; { FuncName.make name }
 
-let type_name := 
+let type_name :=
   | ~ = name; { TypeName.make name }
 
 let string :=
   | ~ = STRING; <SingleQuote>
 
-let number := 
+let number :=
   | ~ = INTEGER; <Integer>
   | ~ = NUMBER; <Numeric>
 
 (* https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-CONSTANTS-GENERIC *)
-let typecast := 
+let typecast :=
   | ~ = type_name; ~ = string; <TypeCast>
   | ~ = string; DOUBLE_COLON; ~ = name; { TypeCast (TypeName.make name, string) }
   (* | CAST; LPAR; ~ = string; AS; ~ = identifier; RPAR; { TypeCast (identifier, string) } *)
